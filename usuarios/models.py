@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Cliente(models.Model):
     nome = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -9,16 +10,16 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nome
-    
+
+
 class Funcionario(models.Model):
     TIPO_CARGO = [
-        ('R','Recepcionista'),
-        ('A','Administrador'),
-        ('L','Limpeza'),
+        ('R', 'Recepcionista'),
+        ('A', 'Administrador'),
+        ('L', 'Limpeza'),
     ]
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     cargo = models.CharField(max_length=1, choices=TIPO_CARGO)
-    
 
 
 class Quarto(models.Model):
@@ -37,7 +38,8 @@ class Quarto(models.Model):
 
     def __str__(self):
         return f'Quarto {self.numero} - {self.get_tipo_display()}'
-    
+
+
 class Reserva(models.Model):
     STATUS_RESERVA = [
         ('P', 'Pendente'),
@@ -55,6 +57,4 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f'Reserva de {self.usuario.nome} para o quarto {self.quarto.numero} - Status: {self.get_status_display()}'
-    
-
 
