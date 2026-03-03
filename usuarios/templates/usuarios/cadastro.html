@@ -1,0 +1,100 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Cadastro - Hotel Serra Nobre{% endblock %}
+
+{% block extra_css %}
+.cadastro-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    width: 100%;
+}
+
+.cadastro-card h1 {
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-main);
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.cadastro-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+.auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.auth-links a {
+    color: var(--accent);
+    text-decoration: none;
+}
+{% endblock %}
+
+{% block content %}
+<div class="cadastro-container">
+    <div class="card cadastro-card">
+        <h1>Criar Conta de Hóspede</h1>
+        <form action="" method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary cadastro-btn">Finalizar Cadastro</button>
+        </form>
+        
+        <div class="auth-links">
+            Já tem uma conta? <a href="{% url 'login' %}">Fazer login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

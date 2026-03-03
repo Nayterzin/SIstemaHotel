@@ -1,0 +1,101 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Bem-vindo ao Hotel Serra Nobre{% endblock %}
+
+{% block extra_css %}
+.choice-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.choice-card {
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.choice-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+}
+
+.icon-box {
+    width: 64px;
+    height: 64px;
+    background: #1e293b; /* Slate 800 */
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+}
+
+.choice-card h2 {
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.choice-card p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.selection-form {
+    display: none;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.hero p {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+}
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Bem-vindo ao Hotel Serra Nobre</h1>
+    <p>Escolha como deseja acessar o sistema para continuar</p>
+</div>
+
+<div class="choice-container">
+    <div class="card choice-card" onclick="submitForm('funcionario')">
+        <div class="icon-box">👔</div>
+        <h2>Funcionário</h2>
+        <p>Acesso restrito para equipe gerenciar quartos, reservas e funcionários.</p>
+        <span class="btn btn-primary">Entrar como Equipe</span>
+    </div>
+
+    <div class="card choice-card" onclick="submitForm('cliente')">
+        <div class="icon-box">✨</div>
+        <h2>Cliente</h2>
+        <p>Cadastre-se ou faça login para fazer reservas e conferir nossos quartos.</p>
+        <span class="btn btn-primary" style="background-color: var(--accent);">Entrar como Hóspede</span>
+    </div>
+</div>
+
+<form id="choice-form" action="" method="post" class="selection-form">
+    {% csrf_token %}
+    <input type="hidden" name="tipo_usuario" id="tipo_usuario_input">
+</form>
+
+<script>
+    function submitForm(type) {
+        document.getElementById('tipo_usuario_input').value = type;
+        document.getElementById('choice-form').submit();
+    }
+</script>
+{% endblock %}

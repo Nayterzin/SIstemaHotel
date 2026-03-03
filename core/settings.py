@@ -120,3 +120,5 @@ STATIC_URL = 'static/'
 # Autenticação
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
+
+
