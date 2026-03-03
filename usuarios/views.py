@@ -58,8 +58,19 @@ def cadastro_usuario(request):
 
 @login_required
 def home(request):
-    """Página inicial para funcionários."""
-    return render(request, 'usuarios/home.html')
+    """Página inicial com redirecionamento baseado no cargo ou tipo de usuário."""
+    # Se for funcionário, verifica o cargo
+    if hasattr(request.user, 'funcionario'):
+        cargo = request.user.funcionario.cargo
+        if cargo == 'A':
+            return redirect('home_admin')
+        elif cargo == 'L':
+            return redirect('home_limpeza')
+        else:
+            return redirect('home_F') # Recepcionista ou padrão
+    
+    # Se for cliente ou usuário comum
+    return redirect('home_C')
 
 def logout_usuario(request):
     """Logout para funcionários."""
@@ -82,20 +93,14 @@ def login_usuario(request):
     return render(request, 'usuarios/login.html')
 
 def home_F(request):
-    """Página inicial para funcionários."""
-    if request.user.is_authenticated:
-        return render(request, 'usuarios/home.html')
-    if request.method == 'GET':
-        quartos = Quarto.objects.all()
-        return render(request, 'usuarios/home.html', {'quartos': quartos})
+    """Página inicial para funcionários (Recepcionistas)."""
+    quartos = Quarto.objects.all()
+    return render(request, 'usuarios/home.html', {'quartos': quartos})
 
 def home_C(request):
     """Página inicial para clientes (hóspedes)."""
-    if request.user.is_authenticated:
-        return render(request, 'usuarios/home.html')
-    if request.method == 'GET':
-        quartos = Quarto.objects.filter(disponivel=True)
-        return render(request, 'usuarios/home.html', {'quartos': quartos})
+    quartos = Quarto.objects.all() # Mostra todos, mas destaca disponibilidade no card
+    return render(request, 'usuarios/home.html', {'quartos': quartos})
 
 @login_required
 def reservar_quarto(request, quarto_id):
@@ -114,13 +119,19 @@ def reservar_quarto(request, quarto_id):
         form = ReservaForm()
     return render(request, 'usuarios/reserva.html', {'form': form})
 
+@login_required
 def home_admin(request):
-    """Página inicial para administradores."""
-    if request.user.is_authenticated:
-        return render(request, 'usuarios/home_admin.html')
-    if request.method == 'GET':
-        quartos = Quarto.objects.all()
-        return render(request, 'usuarios/home_admin.html', {'quartos': quartos})
+    """Página inicial para administradores com estatísticas."""
+    quartos = Quarto.objects.all()
+    quartos_disponiveis_count = Quarto.objects.filter(disponivel=True).count()
+    reservas_ativas_count = Reserva.objects.filter(status='C').count()
+    
+    context = {
+        'quartos': quartos,
+        'quartos_disponiveis_count': quartos_disponiveis_count,
+        'reservas_ativas_count': reservas_ativas_count,
+    }
+    return render(request, 'usuarios/home_admin.html', context)
 
 def editar_quarto(request, quarto_id):
     """Editar um quarto."""
@@ -244,13 +255,12 @@ def relatorio_reservas(request):
         reservas = Reserva.objects.all()
         return render(request, 'usuarios/relatorio_reservas.html', {'reservas': reservas})
 
+@login_required
 def home_limpeza(request):
     """Página inicial para funcionários da limpeza."""
-    if request.user.is_authenticated:
-        return render(request, 'usuarios/home_limpeza.html')
-    if request.method == 'GET':
-        quartos = Quarto.objects.filter(status_limpeza='N')
-        return render(request, 'usuarios/home_limpeza.html', {'quartos': quartos})
+    # Mostra quartos que não estão limpos primeiro
+    quartos = Quarto.objects.all().order_by('status_limpeza') 
+    return render(request, 'usuarios/home_limpeza.html', {'quartos': quartos})
 
 def limpar_quarto(request, quarto_id):
     """Limpar um quarto."""

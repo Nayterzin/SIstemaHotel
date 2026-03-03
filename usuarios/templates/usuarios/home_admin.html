@@ -1,0 +1,190 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Painel Administrativo - Hotel Serra Nobre{% endblock %}
+
+{% block extra_css %}
+.admin-container {
+    padding-bottom: 4rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-info h3 {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.stat-info p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.table-card {
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th {
+    text-align: left;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge.success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); }
+.badge.warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+.badge.danger { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+
+.action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Painel Administrativo</h1>
+            <p style="color: var(--text-muted)">Bem-vindo, {{ request.user.username }}</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'adicionar_quarto' %}" class="btn btn-primary">➕ Adicionar Quarto</a>
+            <a href="{% url 'adicionar_funcionario' %}" class="btn" style="background: var(--surface); border: 1px solid var(--border);">👥 Equipe</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card stat-card">
+            <div class="stat-icon">🏨</div>
+            <div class="stat-info">
+                <h3>Total de Quartos</h3>
+                <p>{{ quartos.count }}</p>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <div class="stat-icon">✨</div>
+            <div class="stat-info">
+                <h3>Disponíveis</h3>
+                <p>{{ quartos_disponiveis_count|default:"0" }}</p>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <div class="stat-icon">📑</div>
+            <div class="stat-info">
+                <h3>Reservas Ativas</h3>
+                <p>{{ reservas_ativas_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 1.5rem;">Gerenciar Quartos</h2>
+    <div class="card table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Quarto</th>
+                    <th>Tipo</th>
+                    <th>Preço</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quarto in quartos %}
+                <tr>
+                    <td><strong>#{{ quarto.numero }}</strong></td>
+                    <td>{{ quarto.get_tipo_display }}</td>
+                    <td>R$ {{ quarto.preco }}</td>
+                    <td>
+                        <span class="badge {% if quarto.disponivel %}success{% else %}danger{% endif %}">
+                            {% if quarto.disponivel %}Livre{% else %}Ocupado{% endif %}
+                        </span>
+                    </td>
+                    <td class="action-btns">
+                        <a href="{% url 'editar_quarto' quarto.id %}" class="btn btn-icon" title="Editar" style="background: var(--border);">✏️</a>
+                        <form action="{% url 'remover_quarto' quarto.id %}" method="post" style="display:inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-icon" title="Remover" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;" onclick="return confirm('Tem certeza que deseja excluir o quarto {{ quarto.numero }}?')">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum quarto cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

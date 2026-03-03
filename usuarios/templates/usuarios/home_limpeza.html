@@ -1,0 +1,131 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Limpeza e Manutenção - Hotel Serra Nobre{% endblock %}
+
+{% block extra_css %}
+.cleaning-container {
+    padding-bottom: 4rem;
+}
+
+.dashboard-header {
+    margin-bottom: 2.5rem;
+}
+
+.rooms-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.cleaning-card {
+    display: flex;
+    padding: 1.5rem;
+    align-items: center;
+    gap: 2rem;
+    border-left: 4px solid #f87171; /* Danger red for "Needs attention" */
+}
+
+.cleaning-card.limpo {
+    border-left-color: #4ade80; /* Success green */
+}
+
+.room-details {
+    flex-grow: 1;
+}
+
+.room-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.room-status {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.red { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
+.dot.green { background-color: #22c55e; box-shadow: 0 0 10px #22c55e; }
+
+.cleaning-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .cleaning-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .cleaning-actions {
+        width: 100%;
+    }
+    
+    .btn-clean {
+        width: 100%;
+    }
+}
+{% endblock %}
+
+{% block content %}
+<div class="cleaning-container">
+    <div class="dashboard-header">
+        <h1>Limpeza e Manutenção</h1>
+        <p style="color: var(--text-muted)">Controle de higienização dos quartos</p>
+    </div>
+
+    <div class="rooms-list">
+        {% for quarto in quartos %}
+        <div class="card cleaning-card {% if quarto.status_limpeza == 'L' %}limpo{% endif %}">
+            <div class="room-details">
+                <h2 class="room-number">Quarto {{ quarto.numero }}</h2>
+                <div class="room-status">
+                    {% if quarto.status_limpeza == 'L' %}
+                    <span class="status-indicator">
+                        <span class="dot green"></span> Limpo e Higienizado
+                    </span>
+                    {% else %}
+                    <span class="status-indicator" style="color: #f87171;">
+                        <span class="dot red"></span> Necessita Limpeza
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="cleaning-actions">
+                {% if quarto.status_limpeza != 'L' %}
+                <form action="{% url 'limpar_quarto' quarto.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-clean">
+                        ✨ Marcar como Limpo
+                    </button>
+                </form>
+                {% else %}
+                <button class="btn disabled" style="background: var(--border); color: var(--text-muted);">
+                    ✅ Já está limpo
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="card" style="text-align: center; padding: 4rem;">
+            <p style="color: var(--text-muted)">Todos os quartos estão em conformidade.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
