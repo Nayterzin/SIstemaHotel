@@ -170,3 +170,73 @@ def adicionar_funcionario(request):
     else:
         form = FuncionarioForm()
     return render(request, 'usuarios/adicionar_funcionario.html', {'form': form})
+
+def remover_funcionario(request, funcionario_id):
+    """Remover um funcionário."""
+    funcionario = Funcionario.objects.get(id=funcionario_id)
+    if request.method == 'POST':
+        funcionario.delete()
+        return redirect('home_admin')
+    return render(request, 'usuarios/remover_funcionario.html', {'funcionario': funcionario})
+
+
+def check_in(request, reserva_id):
+    """Confirmar uma reserva."""
+    reserva = Reserva.objects.filter(status='P')    
+    if request.method == 'POST':
+        reserva.status = 'C'
+        reserva.save()
+        return redirect('home_admin')
+    return render(request, 'usuarios/confirmar_reserva.html', {'reserva': reserva})
+
+def check_out(request, reserva_id):
+    """Finalizar uma reserva."""
+    reserva = Reserva.objects.filter(status='C')    
+    if request.method == 'POST':
+        reserva.status = 'F'
+        reserva.status_limpeza = 'N'
+        reserva.save()
+        return redirect('home_admin')
+    return render(request, 'usuarios/check_out.html', {'reserva': reserva})
+
+def listar_reservas(request):
+    """Listar todas as reservas."""
+    if request.user.is_authenticated:
+        return render(request, 'usuarios/listar_reservas.html')
+    if request.method == 'GET':
+        reservas = Reserva.objects.all()
+        return render(request, 'usuarios/listar_reservas.html', {'reservas': reservas})
+    
+def listar_funcionarios(request):
+    """Listar todos os funcionários."""
+    if request.user.is_authenticated:
+        return render(request, 'usuarios/listar_funcionarios.html')
+    if request.method == 'GET':
+        funcionarios = Funcionario.objects.all()
+        return render(request, 'usuarios/listar_funcionarios.html', {'funcionarios': funcionarios})
+    
+def relatorio_reservas(request):
+    """Gerar relatório de reservas."""
+    if request.user.is_authenticated:
+        return render(request, 'usuarios/relatorio_reservas.html')
+    if request.method == 'GET':
+        reservas = Reserva.objects.all()
+        return render(request, 'usuarios/relatorio_reservas.html', {'reservas': reservas})
+
+def home_limpeza(request):
+    """Página inicial para funcionários da limpeza."""
+    if request.user.is_authenticated:
+        return render(request, 'usuarios/home_limpeza.html')
+    if request.method == 'GET':
+        quartos = Quarto.objects.filter(status_limpeza='N')
+        return render(request, 'usuarios/home_limpeza.html', {'quartos': quartos})
+
+def limpar_quarto(request, quarto_id):
+    """Limpar um quarto."""
+    quarto = Quarto.objects.get(id=quarto_id)
+    if request.method == 'POST':
+        quarto.status_limpeza = 'L'
+        quarto.save()
+        return redirect('home_limpeza')
+    return render(request, 'usuarios/limpar_quarto.html', {'quarto': quarto})
+
