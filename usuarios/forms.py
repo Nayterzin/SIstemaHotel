@@ -3,6 +3,7 @@ from .models import Cliente, Reserva, Quarto, Funcionario
 
 class CadastroClienteForm(forms.ModelForm):
     """Formulário de cadastro apenas para clientes."""
+
     class Meta:
         model = Cliente
         fields = ['nome', 'email', 'telefone', 'cpf']
@@ -12,6 +13,9 @@ class CadastroClienteForm(forms.ModelForm):
             'telefone': forms.TextInput(attrs={'placeholder': '(00) 00000-0000', 'class': 'form-control'}),
             'cpf': forms.TextInput(attrs={'placeholder': '000.000.000-00', 'class': 'form-control'}),
         }
+
+    senha = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Crie uma senha', 'class': 'form-control'}))
+    confirmar_senha = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirme sua senha', 'class': 'form-control'}))
 
 class ReservaForm(forms.ModelForm):
     """Formulário para realizar reservas."""
@@ -45,3 +49,10 @@ class FuncionarioForm(forms.ModelForm):
             'usuario': forms.Select(attrs={'class': 'form-control'}),
             'cargo': forms.Select(attrs={'class': 'form-control'}),
         }
+
+class MudarSenhaForm(forms.Form):
+    """Formulário para mudança de senha."""
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Seu email', 'class': 'form-control'}))
+    senha_atual = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Senha atual', 'class': 'form-control'}))
+    nova_senha = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Nova senha', 'class': 'form-control'}))
+    confirmar_senha = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirmar senha', 'class': 'form-control'}))

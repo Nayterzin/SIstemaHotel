@@ -5,7 +5,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Quarto, Reserva, Cliente, Funcionario
-from .forms import CadastroClienteForm, ReservaForm, QuartoForm, FuncionarioForm
+from .forms import CadastroClienteForm, ReservaForm, QuartoForm, FuncionarioForm, MudarSenhaForm
 
 def pagina_opcoes(request):
     """Tela inicial: escolher login (funcionários) ou cadastro (cliente)."""
@@ -26,11 +26,32 @@ def cadastro_usuario(request):
     if request.method == 'POST':
         form = CadastroClienteForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Cadastro realizado com sucesso.')
+            # Extrair dados do formulário
+            nome = form.cleaned_data.get('nome')
+            email = form.cleaned_data.get('email')
+            senha = form.cleaned_data.get('senha')
+            confirmar_senha = form.cleaned_data.get('confirmar_senha')
+
+            if senha != confirmar_senha:
+                messages.error(request, 'As senhas não coincidem.')
+                return render(request, 'usuarios/cadastro.html', {'form': form})
+
+            # Criar usuário no Django
+            if User.objects.filter(username=email).exists():
+                messages.error(request, 'Este e-mail já está cadastrado.')
+                return render(request, 'usuarios/cadastro.html', {'form': form})
+
+            user = User.objects.create_user(username=email, email=email, password=senha)
+            
+            # Salvar o cliente e associar ao usuário
+            cliente = form.save(commit=False)
+            cliente.usuario = user
+            cliente.save()
+
+            messages.success(request, 'Cadastro realizado com sucesso. Faça login agora.')
             return redirect('login')
         else:
-            messages.error(request, 'Erro no cadastro.')
+            messages.error(request, 'Erro no cadastro. Verifique os campos.')
     else:
         form = CadastroClienteForm()
     return render(request, 'usuarios/cadastro.html', {'form': form})
@@ -239,4 +260,33 @@ def limpar_quarto(request, quarto_id):
         quarto.save()
         return redirect('home_limpeza')
     return render(request, 'usuarios/limpar_quarto.html', {'quarto': quarto})
+
+def mudar_senha(request):
+    """Mudar a senha do usuário."""
+    if request.method == 'POST':
+        form = MudarSenhaForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            senha_atual = form.cleaned_data.get('senha_atual')
+            nova_senha = form.cleaned_data.get('nova_senha')
+            confirmar_senha = form.cleaned_data.get('confirmar_senha')
+
+            if nova_senha != confirmar_senha:
+                messages.error(request, 'As novas senhas não coincidem.')
+                return render(request, 'usuarios/mudar_senha.html', {'form': form})
+
+            user = authenticate(request, username=email, password=senha_atual)
+            if user is not None:
+                user.set_password(nova_senha)
+                user.save()
+                login(request, user)  # Mantém o usuário logado após a troca
+                messages.success(request, 'Senha alterada com sucesso!')
+                return redirect('home')
+            else:
+                messages.error(request, 'E-mail ou senha atual incorretos.')
+        else:
+            messages.error(request, 'Por favor, corrija os erros abaixo.')
+    else:
+        form = MudarSenhaForm()
+    return render(request, 'usuarios/mudar_senha.html', {'form': form})
 

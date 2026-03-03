@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Cliente(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     nome = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     telefone = models.CharField(max_length=15)
