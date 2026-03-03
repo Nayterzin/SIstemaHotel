@@ -5,22 +5,39 @@
 {% block extra_css %}
 .login-container {
     max-width: 450px;
-    margin: 4rem auto;
+    margin: 0 auto;
     width: 100%;
 }
 
-.login-card {
+.hero {
     text-align: center;
+    margin-bottom: 2rem;
 }
 
-.login-card h1 {
-    margin-bottom: 2rem;
+.hero h1 {
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.hero p {
+    color: var(--text-muted);
+}
+
+.icon-box {
+    width: 64px;
+    height: 64px;
+    background: var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
     font-size: 2rem;
 }
 
 .form-group {
     margin-bottom: 1.5rem;
-    text-align: left;
 }
 
 .form-group label {
@@ -38,28 +55,34 @@
     border-radius: var(--radius);
     color: var(--text-main);
     font-size: 1rem;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.15);
+    background: var(--surface);
 }
 
 .login-btn {
     width: 100%;
     margin-top: 1rem;
+    height: 3.5rem;
+    font-size: 1.1rem;
 }
 
 .auth-links {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
+    text-align: center;
     font-size: 0.875rem;
+    color: var(--text-muted);
 }
 
 .auth-links a {
     color: var(--accent);
     text-decoration: none;
+    font-weight: 500;
 }
 
 .auth-links a:hover {
@@ -69,8 +92,13 @@
 
 {% block content %}
 <div class="login-container">
-    <div class="card login-card">
-        <h1>Entrar</h1>
+    <div class="hero">
+        <div class="icon-box">🔑</div>
+        <h1>Bem-vindo de volta</h1>
+        <p>Acesse sua conta para gerenciar suas reservas</p>
+    </div>
+
+    <div class="card">
         <form action="" method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -81,12 +109,12 @@
                 <label for="senha">Senha</label>
                 <input type="password" name="senha" id="senha" class="form-control" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary login-btn">Entrar</button>
+            <button type="submit" class="btn btn-primary login-btn">Entrar no Sistema</button>
         </form>
-        
-        <div class="auth-links">
-            Não tem uma conta? <a href="{% url 'cadastro' %}">Criar cadastro de hóspede</a>
-        </div>
+    </div>
+    
+    <div class="auth-links">
+        Ainda não tem uma conta? <a href="{% url 'cadastro' %}">Criar cadastro de hóspede</a>
     </div>
 </div>
 {% endblock %}
